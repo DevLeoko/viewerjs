@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2023-09-17T03:16:38.052Z
+ * Date: 2024-07-20T10:48:43.582Z
  */
 
 (function (global, factory) {
@@ -1113,32 +1113,26 @@
       };
       sizingImage = getImageNaturalSizes(image, options, function (naturalWidth, naturalHeight) {
         var aspectRatio = naturalWidth / naturalHeight;
-        var initialCoverage = Math.max(0, Math.min(1, options.initialCoverage));
-        var width = viewerWidth;
-        var height = viewerHeight;
         _this2.imageInitializing = false;
-        if (viewerHeight * aspectRatio > viewerWidth) {
-          height = viewerWidth / aspectRatio;
-        } else {
-          width = viewerHeight * aspectRatio;
-        }
-        initialCoverage = isNumber(initialCoverage) ? initialCoverage : 0.9;
-        width = Math.min(width * initialCoverage, naturalWidth);
-        height = Math.min(height * initialCoverage, naturalHeight);
-        var left = (viewerWidth - width) / 2;
-        var top = (viewerHeight - height) / 2;
+        var imageHeight = image.naturalHeight;
+        var imageWidth = image.naturalWidth;
+        var zoomRatio = Math.min(viewerWidth / imageWidth, viewerHeight / imageHeight);
+        var startHeight = imageHeight * zoomRatio;
+        var startWidth = imageWidth * zoomRatio;
+        var startTop = (viewerHeight - startHeight) / 2;
+        var startLeft = (viewerWidth - startWidth) / 2;
         var imageData = {
-          left: left,
-          top: top,
-          x: left,
-          y: top,
-          width: width,
-          height: height,
+          left: startLeft,
+          top: startTop,
+          x: startLeft,
+          y: startTop,
+          width: startWidth,
+          height: startHeight,
           oldRatio: 1,
-          ratio: width / naturalWidth,
+          ratio: 1,
           aspectRatio: aspectRatio,
-          naturalWidth: naturalWidth,
-          naturalHeight: naturalHeight
+          naturalWidth: startWidth,
+          naturalHeight: startHeight
         };
         var initialImageData = assign({}, imageData);
         if (options.rotatable) {
@@ -1159,7 +1153,6 @@
       });
     },
     renderImage: function renderImage(done) {
-      var _this3 = this;
       var image = this.image,
         imageData = this.imageData;
       setStyle(image, assign({
@@ -1170,22 +1163,26 @@
         marginTop: imageData.y
       }, getTransforms(imageData)));
       if (done) {
-        if ((this.viewing || this.moving || this.rotating || this.scaling || this.zooming) && this.options.transition && hasClass(image, CLASS_TRANSITION)) {
-          var onTransitionEnd = function onTransitionEnd() {
-            _this3.imageRendering = false;
-            done();
-          };
-          this.imageRendering = {
-            abort: function abort() {
-              removeListener(image, EVENT_TRANSITION_END, onTransitionEnd);
-            }
-          };
-          addListener(image, EVENT_TRANSITION_END, onTransitionEnd, {
-            once: true
-          });
-        } else {
-          done();
-        }
+        // if ((this.viewing || this.moving || this.rotating || this.scaling || this.zooming)
+        //   && this.options.transition
+        //   && hasClass(image, CLASS_TRANSITION)) {
+        //   const onTransitionEnd = () => {
+        //     this.imageRendering = false;
+        //     done();
+        //   };
+
+        //   this.imageRendering = {
+        //     abort: () => {
+        //       removeListener(image, EVENT_TRANSITION_END, onTransitionEnd);
+        //     },
+        //   };
+
+        //   addListener(image, EVENT_TRANSITION_END, onTransitionEnd, {
+        //     once: true,
+        //   });
+        // } else {
+        done();
+        // }
       }
     },
     resetImage: function resetImage() {
@@ -1345,13 +1342,21 @@
       var element = this.element,
         options = this.options,
         image = this.image,
-        index = this.index,
-        viewerData = this.viewerData;
+        index = this.index;
       removeClass(image, CLASS_INVISIBLE);
       if (options.loading) {
         removeClass(this.canvas, CLASS_LOADING);
       }
-      image.style.cssText = 'height:0;' + "margin-left:".concat(viewerData.width / 2, "px;") + "margin-top:".concat(viewerData.height / 2, "px;") + 'max-width:none!important;' + 'position:relative;' + 'width:0;';
+      var viewerWidth = this.viewer.offsetWidth;
+      var viewerHeight = this.viewer.offsetHeight;
+      var imageHeight = image.naturalHeight;
+      var imageWidth = image.naturalWidth;
+      var zoomRatio = Math.min(viewerWidth / imageWidth, viewerHeight / imageHeight);
+      var startHeight = imageHeight * zoomRatio;
+      var startWidth = imageWidth * zoomRatio;
+      var startTop = (viewerHeight - startHeight) / 2;
+      var startLeft = (viewerWidth - startWidth) / 2;
+      image.style.cssText = "height:".concat(startHeight, "px;") + "width:".concat(startWidth, "px;") + "margin-left:".concat(startLeft, "px;") + "margin-top:".concat(startTop, "px;") + 'max-width:none!important;' + 'position:relative;';
       this.initImage(function () {
         toggleClass(image, CLASS_MOVE, options.movable);
         toggleClass(image, CLASS_TRANSITION, options.transition);
@@ -1497,6 +1502,7 @@
       }
     },
     pointerdown: function pointerdown(event) {
+      console.log('pointerdown');
       var options = this.options,
         pointers = this.pointers;
       var buttons = event.buttons,
@@ -1737,6 +1743,7 @@
     hide: function hide() {
       var _this = this;
       var immediate = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      immediate = true;
       var element = this.element,
         options = this.options;
       if (options.inline || this.hiding || !(this.isShown || this.showing)) {
@@ -2300,6 +2307,13 @@
           // Zoom from the center of the image
           imageData.x -= offsetWidth / 2;
           imageData.y -= offsetHeight / 2;
+        }
+        console.log(this.viewer.offsetWidth, this.viewer.offsetHeight, newWidth, newHeight);
+
+        // If zoom = 1, the image should be placed at the center of the container
+        if (ratio === 1) {
+          imageData.x = (this.viewer.offsetWidth - newWidth) / 2;
+          imageData.y = (this.viewer.offsetHeight - newHeight) / 2;
         }
         imageData.left = imageData.x;
         imageData.top = imageData.y;
@@ -2919,7 +2933,9 @@
     isSwitchable: function isSwitchable() {
       var imageData = this.imageData,
         viewerData = this.viewerData;
-      return this.length > 1 && imageData.x >= 0 && imageData.y >= 0 && imageData.width <= viewerData.width && imageData.height <= viewerData.height;
+      var epsilon = 1e-8; // Define epsilon for rounding errors
+
+      return this.length > 1 && imageData.x >= -epsilon && imageData.y >= -epsilon && imageData.width <= viewerData.width + epsilon && imageData.height <= viewerData.height + epsilon;
     }
   };
 

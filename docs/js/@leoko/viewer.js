@@ -1,17 +1,17 @@
 /*!
- * Viewer.js v1.11.6
+ * LeokoViewer.js v1.11.6
  * https://fengyuanchen.github.io/viewerjs
  *
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2024-07-20T10:48:43.582Z
+ * Date: 2024-07-20T09:22:57.350Z
  */
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Viewer = factory());
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.LeokoViewer = factory());
 })(this, (function () { 'use strict';
 
   function ownKeys(e, r) {
@@ -2307,13 +2307,6 @@
           // Zoom from the center of the image
           imageData.x -= offsetWidth / 2;
           imageData.y -= offsetHeight / 2;
-        }
-        console.log(this.viewer.offsetWidth, this.viewer.offsetHeight, newWidth, newHeight);
-
-        // If zoom = 1, the image should be placed at the center of the container
-        if (ratio === 1) {
-          imageData.x = (this.viewer.offsetWidth - newWidth) / 2;
-          imageData.y = (this.viewer.offsetHeight - newHeight) / 2;
         }
         imageData.left = imageData.x;
         imageData.top = imageData.y;
