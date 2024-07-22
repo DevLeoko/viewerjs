@@ -1,5 +1,5 @@
 {
-  "name": "viewerjs",
+  "name": "@leoko/viewerjs",
   "description": "JavaScript image viewer.",
   "version": "1.11.6",
   "main": "dist/viewer.common.js",
