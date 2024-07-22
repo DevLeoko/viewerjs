@@ -148,7 +148,6 @@ export default {
       options,
       image,
       index,
-      viewerData,
     } = this;
 
     removeClass(image, CLASS_INVISIBLE);
@@ -157,13 +156,25 @@ export default {
       removeClass(this.canvas, CLASS_LOADING);
     }
 
+    const viewerWidth = this.viewer.offsetWidth;
+    const viewerHeight = this.viewer.offsetHeight;
+
+    const imageHeight = image.naturalHeight;
+    const imageWidth = image.naturalWidth;
+    const zoomRatio = Math.min(viewerWidth / imageWidth, viewerHeight / imageHeight);
+
+    const startHeight = imageHeight * zoomRatio;
+    const startWidth = imageWidth * zoomRatio;
+    const startTop = (viewerHeight - startHeight) / 2;
+    const startLeft = (viewerWidth - startWidth) / 2;
+
     image.style.cssText = (
-      'height:0;'
-      + `margin-left:${viewerData.width / 2}px;`
-      + `margin-top:${viewerData.height / 2}px;`
+      `height:${startHeight}px;`
+      + `width:${startWidth}px;`
+      + `margin-left:${startLeft}px;`
+      + `margin-top:${startTop}px;`
       + 'max-width:none!important;'
       + 'position:relative;'
-      + 'width:0;'
     );
 
     this.initImage(() => {

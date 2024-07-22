@@ -258,8 +258,10 @@ export default {
   isSwitchable() {
     const { imageData, viewerData } = this;
 
-    return this.length > 1 && imageData.x >= 0 && imageData.y >= 0
-      && imageData.width <= viewerData.width
-      && imageData.height <= viewerData.height;
+    const epsilon = 1e-8; // Define epsilon for rounding errors
+
+    return this.length > 1 && imageData.x >= -epsilon && imageData.y >= -epsilon
+      && imageData.width <= viewerData.width + epsilon
+      && imageData.height <= viewerData.height + epsilon;
   },
 };

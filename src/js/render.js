@@ -3,7 +3,6 @@ import {
   CLASS_TRANSITION,
   EVENT_ERROR,
   EVENT_LOAD,
-  EVENT_TRANSITION_END,
   EVENT_VIEWED,
 } from './constants';
 import {
@@ -14,8 +13,6 @@ import {
   getImageNameFromURL,
   getImageNaturalSizes,
   getTransforms,
-  hasClass,
-  isNumber,
   removeClass,
   removeListener,
   setData,
@@ -208,37 +205,30 @@ export default {
 
     sizingImage = getImageNaturalSizes(image, options, (naturalWidth, naturalHeight) => {
       const aspectRatio = naturalWidth / naturalHeight;
-      let initialCoverage = Math.max(0, Math.min(1, options.initialCoverage));
-      let width = viewerWidth;
-      let height = viewerHeight;
 
       this.imageInitializing = false;
 
-      if (viewerHeight * aspectRatio > viewerWidth) {
-        height = viewerWidth / aspectRatio;
-      } else {
-        width = viewerHeight * aspectRatio;
-      }
+      const imageHeight = image.naturalHeight;
+      const imageWidth = image.naturalWidth;
+      const zoomRatio = Math.min(viewerWidth / imageWidth, viewerHeight / imageHeight);
 
-      initialCoverage = isNumber(initialCoverage) ? initialCoverage : 0.9;
-      width = Math.min(width * initialCoverage, naturalWidth);
-      height = Math.min(height * initialCoverage, naturalHeight);
-
-      const left = (viewerWidth - width) / 2;
-      const top = (viewerHeight - height) / 2;
+      const startHeight = imageHeight * zoomRatio;
+      const startWidth = imageWidth * zoomRatio;
+      const startTop = (viewerHeight - startHeight) / 2;
+      const startLeft = (viewerWidth - startWidth) / 2;
 
       const imageData = {
-        left,
-        top,
-        x: left,
-        y: top,
-        width,
-        height,
+        left: startLeft,
+        top: startTop,
+        x: startLeft,
+        y: startTop,
+        width: startWidth,
+        height: startHeight,
         oldRatio: 1,
-        ratio: width / naturalWidth,
+        ratio: 1,
         aspectRatio,
-        naturalWidth,
-        naturalHeight,
+        naturalWidth: startWidth,
+        naturalHeight: startHeight,
       };
       const initialImageData = assign({}, imageData);
 
@@ -276,26 +266,26 @@ export default {
     }, getTransforms(imageData)));
 
     if (done) {
-      if ((this.viewing || this.moving || this.rotating || this.scaling || this.zooming)
-        && this.options.transition
-        && hasClass(image, CLASS_TRANSITION)) {
-        const onTransitionEnd = () => {
-          this.imageRendering = false;
-          done();
-        };
+      // if ((this.viewing || this.moving || this.rotating || this.scaling || this.zooming)
+      //   && this.options.transition
+      //   && hasClass(image, CLASS_TRANSITION)) {
+      //   const onTransitionEnd = () => {
+      //     this.imageRendering = false;
+      //     done();
+      //   };
 
-        this.imageRendering = {
-          abort: () => {
-            removeListener(image, EVENT_TRANSITION_END, onTransitionEnd);
-          },
-        };
+      //   this.imageRendering = {
+      //     abort: () => {
+      //       removeListener(image, EVENT_TRANSITION_END, onTransitionEnd);
+      //     },
+      //   };
 
-        addListener(image, EVENT_TRANSITION_END, onTransitionEnd, {
-          once: true,
-        });
-      } else {
-        done();
-      }
+      //   addListener(image, EVENT_TRANSITION_END, onTransitionEnd, {
+      //     once: true,
+      //   });
+      // } else {
+      done();
+      // }
     }
   },
 

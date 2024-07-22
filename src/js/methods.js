@@ -129,6 +129,7 @@ export default {
    * @returns {Viewer} this
    */
   hide(immediate = false) {
+    immediate = true;
     const { element, options } = this;
 
     if (options.inline || this.hiding || !(this.isShown || this.showing)) {
@@ -786,6 +787,12 @@ export default {
         // Zoom from the center of the image
         imageData.x -= offsetWidth / 2;
         imageData.y -= offsetHeight / 2;
+      }
+
+      // If zoom = 1, the image should be placed at the center of the container
+      if (ratio === 1) {
+        imageData.x = (this.viewer.offsetWidth - newWidth) / 2;
+        imageData.y = (this.viewer.offsetHeight - newHeight) / 2;
       }
 
       imageData.left = imageData.x;
