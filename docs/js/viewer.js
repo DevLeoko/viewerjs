@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2024-07-20T10:48:43.582Z
+ * Date: 2024-07-22T19:43:22.969Z
  */
 
 (function (global, factory) {
@@ -1502,7 +1502,6 @@
       }
     },
     pointerdown: function pointerdown(event) {
-      console.log('pointerdown');
       var options = this.options,
         pointers = this.pointers;
       var buttons = event.buttons,
@@ -2308,7 +2307,6 @@
           imageData.x -= offsetWidth / 2;
           imageData.y -= offsetHeight / 2;
         }
-        console.log(this.viewer.offsetWidth, this.viewer.offsetHeight, newWidth, newHeight);
 
         // If zoom = 1, the image should be placed at the center of the container
         if (ratio === 1) {
